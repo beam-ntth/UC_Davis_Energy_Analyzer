@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
+
+    <title>UC Davis Energy Analyzer</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark py-3">
+        <span class="navbar-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
+        <span class="navbar-brand mr-auto">UC Davis Energy Analyzer + OSISoft</span>
+    </nav>
+    <form action="/analyze">
+        <nav class="navbar navbar-light bg-light px-xl-5 px-4 py-3">
+            <div class="form-inline mr-auto">
+            <!-- List of all the categories -->
+                <div class="mx-3">
+                    <span class="navbar-brand">Analyzing Category: </span>
+                    <select class="form-control" name='category' required>
+                        <option value="---">---</option>
+                        <option value="use-most">Most Energy Consumption</option>
+                        <option value="use-least">Least Energy Consumption</option>
+                        <option value="save-most">Saving Most Energy</option>
+                        <option value="save-least">Saving Least Energy</option>
+                    </select>  
+                </div>
+                <div class="mx-3">
+                    <span class="navbar-brand"> Date: </span>
+                    <input type="date" class="form-control" id="start-date" name="date" min="2018-01-18" required>
+                </div>
+                <div class="mx-3">
+                    <span class="navbar-brand"> Choice: </span>
+                    <select class="form-control" name='ceed' required>
+                        <option value="---">---</option>
+                        <option value="ChilledWater">Chilled Water</option>
+                        <option value="Electricity">Electricity</option>
+                        <option value="Steam">Steam</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-outline-dark mx-3 analyze-btn"> Analyze! </button>
+            </div>  
+        </nav>
+    </form>
+    <div class="refresh text-center my-3">
+        <!-- <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> -->
+    </div>
+    
+    <div class="container">
+        {% if query %}
+            <div class="row result-row align-items-center py-3">
+                <div class="col-4">
+                    <span class="title">Category: </span> <span class="subtitle cat">{{ query.category }}</span>
+                </div>
+                <div class="col-4">
+                    <span class="title">Date: </span> <span class="subtitle date">{{ query.date }}</span>
+                </div>
+                <div class="col-4">
+                    <span class="title">Choice: </span> <span class="subtitle ceed">{{ query.ceed }}</span>
+                </div>
+            </div>
+        {% endif %}
+        <div class="my-3"></div>
+        <div class="result-container">
+            <div class="result-list">
+            {% if data %}
+                {% for datum in data %}
+                    <div class="row align-items-center px-4 py-3" data-name="{{ datum.building }}" data-date="{{query.date}}" data-ceed="{{query.ceed}}">
+                    <div class="col-4">
+                        <div class="row">
+                            <span class="title">{{ datum.rank }}. <span class="bld-name">{{ datum.building }}</span></span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <span class="ml-auto m-3">
+                            <b>Annual Cost: </b> {{ datum.cost }} <br>
+                            <b>Construction Date: </b> {{ datum.construct }} <br>
+                            <b>Primary Usage: </b> {{ datum.primary }} <br>
+                            <b>Energy Consumed Today: </b> {{ datum.value }} kBtu
+                        </span>
+                    </div>
+                    <div class="col-1 text-right">
+                        <span>Details</span>
+                    </div>
+                    <div class="col-1">
+                        <span class="detail detail-btn"><svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 -1 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span class="navbar-brand">
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% if data_save %}
+                {% for datum in data_save %}
+                    <div class="row align-items-center px-4 py-3" data-name="{{ datum.building }}" data-date="{{query.date}}" data-ceed="{{query.ceed}}">
+                        <div class="col-4">
+                            <div class="row">
+                                <span class="title">{{ datum.rank }}. <span class="bld-name">{{ datum.building }}</span></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <span class="ml-auto m-3">
+                                <b>Annual Cost: </b> {{ datum.cost }} <br>
+                                <b>Construction Date: </b> {{ datum.construct }} <br>
+                                <b>Primary Usage: </b> {{ datum.primary }} <br>
+                                <b>Energy Consumed Today: </b> {{ datum.value }} kBtu <br>
+                                <b>Difference: </b> <span class="{% if datum.diff <= 0 %} text-success {% else %} text-danger{% endif %}"> {% if datum.diff > 0 %} + {% endif %} {{ datum.diff }} kBtu </span>
+                        </div>
+                        <div class="col-1 text-right">
+                            <span>Details</span>
+                        </div>
+                        <div class="col-1">
+                            <span class="detail detail-btn"><svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 -1 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span class="navbar-brand">
+                        </div>
+                    </div>
+                {% endfor %}
+
+            {% endif %}
+            {% if detail %}
+                <div class="row align-items-center px-4 py-3">
+                    <div class="col"><span class="title">Details of {{detail.building}}</span></div>
+                </div>
+                <div class="row align-items-center px-4 py-3">
+                    <div class="col-6"><b>Date:</b> {{util.date}}</div>
+                    <div class="col-6"><b>Choice:</b> {{util.ceed}}</div>
+                </div>
+                <div class="row align-items-center px-4 py-3">
+                    <div class="col-6">
+                        <b>Construction Date:</b> {{detail.construct}}<br>
+                        <b>Latitude:</b> {{detail.lat}}<br>
+                        <b>Longitude:</b> {{detail.long}}
+                    </div>
+                    <div class="col-6">
+                        <b>Maintained Gross Sq. Ft. :</b> {{detail.mgsf}}<br>
+                        <b>Primary Usage (Type):</b> {{detail.primary}}<br>
+                    </div>
+                </div>
+                <div class="row align-items-center px-4 py-3">
+                    <div class="col-6"><b>Average amount of people today:</b> {{detail.avg_ppl}}</div>
+                    <div class="col-6"><b>Estimated Price we pay today:</b>$ {{detail.avg_price}}</div>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+        {% if detail %}
+            <div class="my-3"></div>
+            <div class="graph-container">
+                <div class="row align-items-center px-4 py-3">
+                    <div class="col"><span class="title">Amount usage in the past month</span></div>
+                </div>
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="col-10">
+                        <img src="../../static/images/{{detail.caan}}.png" class="img-fluid" />
+                    </div>
+                    <div class="col-1"></div>
+                </div>
+                <div class="py-3"></div>
+            </div>
+            <div class="my-3"></div>
+        {% endif %}
+
+    </div>
+    
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="../../static/js/main.js"></script>
+  </body>
+</html>
